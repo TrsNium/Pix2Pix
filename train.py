@@ -46,3 +46,11 @@ class Train():
         self.UNet_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_logits, labels=tf.ones_like(fake_out)))
 
         self.d_loss = self.d_loss_fake + self.d_loss_real
+
+        self.opt_d = tf.train.AdamOptimizer(0.0003).minimize(self.d_loss)
+        self.opt_g = tf.train.AdamOptimizer(0.0003).minimize(self.UNet_loss)
+
+train = Train()
+with tf.Session() as sess:
+    tf.global_variables_initializer.run()
+    saver = tf.train.Saver(tf.global_variables())
