@@ -2,13 +2,12 @@ import tensorflow as tf
 import numpy as np
 
 class UNet():
-    def __init__(self):
+    def __init__(self, input_l):
         #if you haven't known about UNet yet,check out following.
         #https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/
 
         #input_layer
         #batch_size, x, y, RGB
-        input_l = tf.placeholder(tf.float32, shape=[None, 572, 572, 3])
 
         enc_conv1 = tf.layers.conv2d(inputs=input_l, filters=64, kernel_size=[3,3,3], activation=tf.nn.relu)
         enc_conv1 = tf.layers.conv2d(inputs=enc_conv1, filters=64, kernel_size=[3,3], activation=tf.nn.relu)
