@@ -42,15 +42,15 @@ class Train():
         fake_out = dis_fake.out
 
         self.d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=real_logits, labels=tf.ones_like(real_out)))
-        self.d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_logits, labels=tf.ones_like(fake_out)))
+        self.d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_logits, labels=tf.zeros_like(fake_out)))
         self.UNet_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_logits, labels=tf.ones_like(fake_out)))
 
         self.d_loss = self.d_loss_fake + self.d_loss_real
-
+        self.g_loss = self.UNet_loss + 100*tf.reduce_mean(tf.abs(self.realA-self.fakeA))
         self.opt_d = tf.train.AdamOptimizer(0.0003).minimize(self.d_loss)
-        self.opt_g = tf.train.AdamOptimizer(0.0003).minimize(self.UNet_loss)
+        self.opt_g = tf.train.AdamOptimizer(0.0003).minimize(self.g_loss)
 
-batch_size = 5
+batch_size = 2
 epochs = 3000
 filenames = os.listdir('./data/rgb388/')
 data_size = len(filenames)
@@ -77,20 +77,23 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_plac
     
     for epoch in range(epochs):
         new_time = time.time() 
-        sum_g_loss = 0.
-        sum_d_loss = 0.
         for _ in range(0, data_size, batch_size):
             batch_files = [random.choice(filenames) for _ in range(batch_size)]
             
-            rgb398 = sample(388, 3, './data/rgb388/', batch_files)
-            linedraw398 = sample(388, 3, './data/linedraw388/', batch_files)
+            rgb388 = sample(388, 3, './data/rgb388/', batch_files)
+            linedraw388 = sample(388, 3, './data/linedraw388/', batch_files)
             linedraw572 = sample(572, 3, './data/linedraw572/', batch_files)
+            
+            batch_time = time.time()
+            d_loss, _ = sess.run([train.d_loss,train.opt_d],{train.realA:rgb388,train.reshaped_realB:linedraw388,train.realB:linedraw572})
 
-            g_loss, _ =sess.run([train.UNet_loss,train.opt_g], {train.realA:rgb398,train.reshaped_realB:linedraw398,train.realB:linedraw572})
-            d_loss, _ =sess.run([train.d_loss,train.opt_d], {train.realA:rgb398,train.reshaped_realB:linedraw398,train.realB:linedraw572}) 
-
+            g_loss, _ = sess.run([train.g_loss,train.opt_g],{train.realA:rgb388,train.reshaped_realB:linedraw388,train.realB:linedraw572})
             sum_g_loss+= g_loss
             sum_d_loss+= d_loss
+            
+            print('    g_loss:',g_loss,'    d_loss:',d_loss,' speed:',time.time()-batch_time," batches / s")
 
-        print('epoch_num:'+epoch+'    g_loss:'+(sum_g_loss/step)+'    d_loss:'+(sum_d_loss/step)+' speed:'+time.time()-new_time)
+        print('--------------------------------')
+        print('epoch_num:',epoch,'    epoch_time:',time.time()-new_time)
+        print('--------------------------------')
         saver.save(sess, "saved/model.ckpt")
