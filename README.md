@@ -1,6 +1,5 @@
 # Pix2Pix
-If you haven't known about UNet, check out [here](https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/)   
-I will use this experience for CycleGAN.   
+If you haven't known about Pix2Pix, check out [here](https://arxiv.org/abs/1611.07004)     
 
 # DataSet
 I got dataset from pixiv and safebooru.    
