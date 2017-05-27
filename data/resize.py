@@ -8,8 +8,8 @@ linedraw_dir = './RGB_LineDraw/linedraw/'
 rgb572_path = './rgb572/'
 linedraw572_path = './linedraw572/'
 
-rgb398_path = './rgb398/'
-linedraw398_path = './linedraw398/'
+rgb398_path = './rgb388/'
+linedraw398_path = './linedraw388/'
 
 if not os.path.exists(rgb572_path):
     os.mkdir(rgb572_path)
@@ -48,7 +48,7 @@ for n in os.listdir(rgb572_path):
     img_rgb = Image.open(rgb572_path+n)
     img_linedraw = Image.open(linedraw572_path+n)
 
-    resize_rgb = img_rgb.resize((398,398))
-    resize_linedraw = img_linedraw.resize((398,398))
+    resize_rgb = img_rgb.resize((388,388))
+    resize_linedraw = img_linedraw.resize((388,388))
     resize_rgb.save(rgb398_path+n, quality=100, optimize=True)
     resize_linedraw.save(linedraw398_path+n, quality=100, optimize=True)
