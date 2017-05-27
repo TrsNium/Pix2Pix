@@ -50,6 +50,7 @@ class Train():
         self.opt_d = tf.train.AdamOptimizer(0.0003).minimize(self.d_loss)
         self.opt_g = tf.train.AdamOptimizer(0.0003).minimize(self.g_loss)
 
+
 batch_size = 2
 epochs = 3000
 filenames = os.listdir('./data/rgb388/')
@@ -86,11 +87,8 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_plac
             
             batch_time = time.time()
             d_loss, _ = sess.run([train.d_loss,train.opt_d],{train.realA:rgb388,train.reshaped_realB:linedraw388,train.realB:linedraw572})
-
             g_loss, _ = sess.run([train.g_loss,train.opt_g],{train.realA:rgb388,train.reshaped_realB:linedraw388,train.realB:linedraw572})
-            sum_g_loss+= g_loss
-            sum_d_loss+= d_loss
-            
+             
             print('    g_loss:',g_loss,'    d_loss:',d_loss,' speed:',time.time()-batch_time," batches / s")
 
         print('--------------------------------')
