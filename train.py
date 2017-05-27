@@ -57,6 +57,9 @@ filenames = os.listdir('./data/rgb388/')
 data_size = len(filenames)
 step = int(data_size/batch_size)
 
+if not os.path.exists('./saved/'):
+    os.mkdir('./saved/')
+
 def sample(size, channel, path, batch_files):
     imgs = np.empty((0,size,size,channel), int)
 
