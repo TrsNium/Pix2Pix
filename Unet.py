@@ -45,7 +45,7 @@ class UNet():
 
         concat_conv2 = copy_and_crop(enc_conv3, 8, -8, 8, -8)
         upconv2 = tf.layers.conv2d_transpose(inputs=dec_conv1, filters=256, kernel_size=[2,2])
-        upconv2 tf.concat([concat_conv2 ,upconv2], 3)
+        upconv2 = tf.concat([concat_conv2 ,upconv2], 3)
 
         dec_conv2 = tf.layers.conv2d(inputs=upconv2, filters=256, kernel_size=[3,3], activation=tf.nn.relu)
         dec_conv2 = tf.layers.conv2d(inputs=dec_conv2, filters=256, kernel_size=[3,3], activation=tf.nn.relu)

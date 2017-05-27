@@ -2,12 +2,10 @@ import tensorflow as tf
 import numpy as np
 from Unet import UNet
 from discriminator import Discriminator
+import os
+from PIL import Image
 
 class Train():
-
-    def sample(self):
-        pass;
-
     def __init__(self):
 
         #realA
@@ -42,7 +40,7 @@ class Train():
         fake_out = dis_fake.out
 
         self.d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=real_logits, labels=tf.ones_like(real_out)))
-        self.d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=fake_logits, labels=tf.ones_like(fake_out)))
+        self.d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_logits, labels=tf.ones_like(fake_out)))
         self.UNet_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_logits, labels=tf.ones_like(fake_out)))
 
         self.d_loss = self.d_loss_fake + self.d_loss_real
@@ -50,7 +48,27 @@ class Train():
         self.opt_d = tf.train.AdamOptimizer(0.0003).minimize(self.d_loss)
         self.opt_g = tf.train.AdamOptimizer(0.0003).minimize(self.UNet_loss)
 
+def sample(size, channel, path):
+    '''
+        input : dir string 
+              : size int
+              : channel int
+              dir is used for path to load image 
+              size is height and width
+              As example ,when image is RGBcolor ,channel is 3
+        output:out put dims are [batchsize, height, width, channel]
+    '''
+    imgs = np.array([])
+    for n in os.listdir(path):
+        img = np.array(Image.open(path+n))
+        imgs = np.append(imgs,img)
+    print(imgs.shape)
+
+sample(64, 3, './data/rgb398/')
+
+'''
 train = Train()
 with tf.Session() as sess:
     tf.global_variables_initializer.run()
     saver = tf.train.Saver(tf.global_variables())
+'''
