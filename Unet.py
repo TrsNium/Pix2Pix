@@ -9,7 +9,7 @@ class UNet():
         #input_layer
         #batch_size, x, y, RGB
 
-        enc_conv1 = tf.layers.conv2d(inputs=input_l, filters=64, kernel_size=[3,3,3], activation=tf.nn.relu)
+        enc_conv1 = tf.layers.conv2d(inputs=input_l, filters=64, kernel_size=[3,3], activation=tf.nn.relu)
         enc_conv1 = tf.layers.conv2d(inputs=enc_conv1, filters=64, kernel_size=[3,3], activation=tf.nn.relu)
 
         enc_pool1 = tf.layers.max_pooling2d(inputs=enc_conv1, pool_size=[2,2], strides=2)

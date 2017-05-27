@@ -77,7 +77,7 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_plac
         new_time = time.time() 
         sum_g_loss = 0.
         sum_d_loss = 0.
-        for _ in range(0, data_size, batch_size)):
+        for _ in range(0, data_size, batch_size):
             batch_files = [random.choice(filenames) for _ in range(batch_size)]
             
             rgb398 = sample(398, 3, './data/rgb398/', batch_files)
