@@ -47,13 +47,13 @@ class Train():
 
         self.d_loss = self.d_loss_fake + self.d_loss_real
         self.g_loss = self.UNet_loss + 100*tf.reduce_mean(tf.abs(self.realA-self.fakeA))
-        self.opt_d = tf.train.AdamOptimizer(0.0003).minimize(self.d_loss)
-        self.opt_g = tf.train.AdamOptimizer(0.0003).minimize(self.g_loss)
+        self.opt_d = tf.train.AdamOptimizer(0.0001).minimize(self.d_loss)
+        self.opt_g = tf.train.AdamOptimizer(0.0001).minimize(self.g_loss)
 
 
-batch_size = 2
+batch_size = 1
 epochs = 3000
-filenames = os.listdir('./data/rgb388/')
+filenames = os.listdir('./data/crop_rgb388/')
 data_size = len(filenames)
 step = int(data_size/batch_size)
 
@@ -76,9 +76,9 @@ def sample(size, channel, path, batch_files):
 #batch_files = [random.choice(filenames) for _ in range(batch_size)]  
 #sample(size=388, channel=3, path='./data/linedraw388/', batch_files=batch_files)
 
-def visualize_g(size, g_img, t_img, batch_size, epoch, i):
+def visualize_g(size, g_img, x_img, t_img,batch_size, epoch, i):
     for n in range(batch_size):
-        img = np.concatenate((g_img[n],t_img[n]),axis=1)
+        img = np.concatenate((g_img[n], x_img[n], t_img[n]),axis=1)
         img = Image.fromarray(np.uint8(img))
         img.save('./visualized/epoch{}batch_num{}batch{}.jpg'.format(epoch,n,i))
     
@@ -93,15 +93,15 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_plac
         for i in range(0, data_size, batch_size):
             batch_files = [random.choice(filenames) for _ in range(batch_size)]
             
-            rgb388 = sample(388, 3, './data/rgb388/', batch_files)
-            linedraw388 = sample(388, 3, './data/linedraw388/', batch_files)
+            rgb388 = sample(388, 3, './data/crop_rgb388/', batch_files)
+            linedraw388 = sample(388, 3, './data/crop_linedraw388/', batch_files)
             linedraw572 = sample(572, 3, './data/linedraw572/', batch_files)
             
             batch_time = time.time()
             d_loss, _ = sess.run([train.d_loss,train.opt_d],{train.realA:rgb388,train.reshaped_realB:linedraw388,train.realB:linedraw572})
             g_img, g_loss, _ = sess.run([train.fakeA,train.g_loss,train.opt_g],{train.realA:rgb388,train.reshaped_realB:linedraw388,train.realB:linedraw572})
-             
-            visualize_g(388, g_img, linedraw388, batch_size, epoch, i)
+            g_img, g_loss, _ = sess.run([train.fakeA,train.g_loss,train.opt_g],{train.realA:rgb388,train.reshaped_realB:linedraw388,train.realB:linedraw572})             
+            visualize_g(388, g_img, linedraw388, rgb388, batch_size, epoch, i)
             print('    g_loss:',g_loss,'    d_loss:',d_loss,' speed:',time.time()-batch_time," batches / s")
 
         print('--------------------------------')
