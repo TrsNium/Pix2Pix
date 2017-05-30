@@ -33,13 +33,13 @@ class Train():
         fakeAB = tf.concat([self.fakeA, self.reshaped_realB], 3)
         
         #discriminator
-        dis_real = Discriminator(realAB, False)
-        real_logits = dis_real.last_h
-        real_out = dis_real.out
+        dis_r = Discriminator(realAB, False)
+        real_logits = dis_r.last_h
+        real_out = dis_r.out
 
-        dis_fake = Discriminator(fakeAB, True)
-        fake_logits = dis_fake.last_h
-        fake_out = dis_fake.out
+        dis_f = Discriminator(fakeAB, True)
+        fake_logits = dis_f.last_h
+        fake_out = dis_f.out
 
         self.d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=real_logits, labels=tf.ones_like(real_out)))
         self.d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_logits, labels=tf.zeros_like(fake_out)))
@@ -47,9 +47,13 @@ class Train():
 
         self.d_loss = self.d_loss_fake + self.d_loss_real
         self.g_loss = self.UNet_loss + 100*tf.reduce_mean(tf.abs(self.realA-self.fakeA))
-        self.opt_d = tf.train.AdamOptimizer(0.0002).minimize(self.d_loss)
-        self.opt_g = tf.train.AdamOptimizer(0.0002).minimize(self.g_loss)
 
+        training_var = tf.trainable_variables()
+        d_var = [var for var in training_var if 'd_' in var.name]
+        g_var = [var for var in training_var if 'g_' in var.name]
+
+        self.opt_d = tf.train.AdamOptimizer(0.0002,beta1=0.5).minimize(self.d_loss, var_list=d_var)
+        self.opt_g = tf.train.AdamOptimizer(0.0002,beta1=0.5).minimize(self.g_loss, var_list=g_var)
 
 batch_size = 5
 epochs = 3000
@@ -88,6 +92,11 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_plac
     tf.global_variables_initializer().run()
     saver = tf.train.Saver(tf.global_variables())
     
+    counter = 1
+    #g_sum = tf.summary.merge([train.d__sum, train.fake_B_sum,train.d_loss_fake_sum,train.g_loss_sum])
+    #d_sum = tf.summary.merge([train.d_sum, train.d_loss_real_sum, train.d_loss_sum])
+    #writer = tf.summary.FileWriter('./logas', sess.graph)
+
     for epoch in range(epochs):
         new_time = time.time() 
         for i in range(0, data_size, batch_size):
@@ -97,8 +106,13 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_plac
             linedraw388 = sample(512, 3, './data/linedraw388/', batch_files)
             
             batch_time = time.time()
-            g_img, g_loss, _ = sess.run([train.fakeA,train.g_loss,train.opt_g],{train.realA:rgb388,train.reshaped_realB:linedraw388})  
-            d_loss, _ = sess.run([train.d_loss,train.opt_d],{train.realA:rgb388,train.reshaped_realB:linedraw388})
+            d_loss, _ = sess.run([train.d_loss,train.opt_d],{train.realA:rgb388,train.reshaped_realB:linedraw388})  
+            #writer.add_summary(d_loss, counter)
+
+            g_img, g_loss, _ = sess.run([train.fakeA,train.g_loss,train.opt_g],{train.realA:rgb388,train.reshaped_realB:linedraw388})
+            #writer.add_summary(g_loss, counter)
+
+            #counter+=1
             #g_img, g_loss, _ = sess.run([train.fakeA,train.g_loss,train.opt_g],{train.realA:rgb388,train.reshaped_realB:linedraw388,train.realB:linedraw572})             
             visualize_g(512, g_img, linedraw388, rgb388, batch_size, epoch, i)
             print('    g_loss:',g_loss,'    d_loss:',d_loss,' speed:',time.time()-batch_time," batches / s")
