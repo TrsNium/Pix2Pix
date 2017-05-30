@@ -58,11 +58,35 @@ class UNet():
         dec_conv3 = tf.layers.batch_normalization(tf.layers.conv2d(inputs=upconv3, filters=128, kernel_size=[3,3], activation=tf.nn.relu))
         dec_conv3 = tf.layers.batch_normalization(tf.layers.conv2d(inputs=dec_conv3, filters=128, kernel_size=[3,3], activation=tf.nn.relu))
 
-        concat_conv3 = copy_and_crop(enc_conv1, 88, -88, 88, -88)
+        concat_conv4 = copy_and_crop(enc_conv1, 88, -88, 88, -88)
         upconv4 = tf.layers.conv2d_transpose(inputs=dec_conv3, filters=64, kernel_size=[2,2], strides=(2,2))
-        upconv4 = tf.concat([concat_conv3, upconv4], 3)
+        upconv4 = tf.concat([concat_conv4, upconv4], 3)
 
         dec_conv4 = tf.layers.batch_normalization(tf.layers.conv2d(inputs=upconv4, filters=64, kernel_size=[3,3], activation=tf.nn.relu))
         dec_conv4 = tf.layers.batch_normalization(tf.layers.conv2d(inputs=dec_conv4, filters=64, kernel_size=[3,3], activation=tf.nn.relu))
 
-        self.dec_conv_last = tf.layers.batch_normalization(tf.layers.conv2d(inputs= dec_conv4, filters=3, kernel_size=[1,1]))
+        self.dec_conv_last = tf.layers.conv2d(inputs= dec_conv4, filters=3, kernel_size=[1,1])
+        ii
+
+class UNet1():
+    def __init__(self,inputs):
+        enc_c0 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(inputs=inputs, filters=32, kernel_size=[3,3], strides=(1,1), padding='SAME')))
+        enc_c1 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(inputs=enc_c0, filters=64, kernel_size=[4,4], strides=(2,2), padding='SAME')))
+        enc_c2 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(inputs=enc_c1, filters=64, kernel_size=[3,3], strides=(1,1), padding='SAME')))
+        enc_c3 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(inputs=enc_c2, filters=128, kernel_size=[4,4], strides=(2,2), padding='SAME')))
+        enc_c4 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(inputs=enc_c3, filters=128, kernel_size=[3,3], strides=(1,1), padding='SAME')))
+        enc_c5 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(inputs=enc_c4, filters=256, kernel_size=[4,4], strides=(2,2), padding='SAME')))
+        enc_c6 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(inputs=enc_c5, filters=256, kernel_size=[3,3], strides=(1,1), padding='SAME')))
+        enc_c7 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(inputs=enc_c6, filters=512, kernel_size=[4,4], strides=(2,2), padding='SAME')))
+        enc_c8 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(inputs=enc_c7, filters=512, kernel_size=[3,3], strides=(1,1), padding='SAME')))
+
+        dec_dc8 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d_transpose(tf.concat([enc_c7,enc_c8],3), filters=512, kernel_size=[4,4], strides=(2,2), padding='SAME')))
+        dec_dc7 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(dec_dc8, filters=256, kernel_size=[3,3], strides=(1,1), padding='SAME')))
+        dec_dc6 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d_transpose(tf.concat([enc_c6,dec_dc7],3), filters=256, kernel_size=[4,4], strides=(2,2), padding='SAME')))
+        dec_dc5 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(dec_dc6, filters=128, kernel_size=[3,3], strides=(1,1), padding='SAME')))
+        #dec_dc5 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(dec_dc6, filters=128, kernel_size=[2,2], strides=(1,1))))   
+        dec_dc4 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d_transpose(tf.concat([enc_c4,dec_dc5],3), filters=128, kernel_size=[4,4], strides=(2,2), padding='SAME')))
+        dec_dc3 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(dec_dc4, filters=64, kernel_size=[3,3], strides=(1,1), padding='SAME')))
+        dec_dc2 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d_transpose(tf.concat([enc_c2,dec_dc3],3), filters=64, kernel_size=[4,4], strides=(2,2), padding='SAME')))
+        dec_dc1 = tf.nn.relu(tf.layers.batch_normalization(tf.layers.conv2d(dec_dc2, filters=32, kernel_size=[3,3], strides=(1,1), padding='SAME')))
+        self.dec_dc0 = tf.layers.conv2d(tf.concat([enc_c0,dec_dc1],3), filters=3, kernel_size=[3,3], strides=(1,1), padding='SAME')

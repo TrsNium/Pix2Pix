@@ -60,8 +60,8 @@ for n in os.listdir(rgb572_path):
     img_rgb = Image.open(rgb572_path+n)
     img_linedraw = Image.open(linedraw572_path+n)
 
-    resize_rgb = img_rgb.resize((388,388))
-    resize_linedraw = img_linedraw.resize((388,388))
+    resize_rgb = img_rgb.resize((512,512))
+    resize_linedraw = img_linedraw.resize((512,512))
     resize_rgb.save(rgb398_path+n, quality=100, optimize=True)
     resize_linedraw.save(linedraw398_path+n, quality=100, optimize=True)
 
