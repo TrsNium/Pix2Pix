@@ -56,7 +56,7 @@ class Train():
 
 batch_size = 5
 epochs = 3000
-filenames = [random.choice(os.listdir('./data/crop_rgb388/')) for _ in range(1000)]
+filenames = [random.choice(os.listdir('./data/rgb512/')) for _ in range(1000)]
 data_size = len(filenames)
 step = int(data_size/batch_size)
 
@@ -71,7 +71,6 @@ def sample(size, channel, path, batch_files):
 
     for file_name in batch_files:
         img = np.array(Image.open(path+file_name)).astype(np.float32)
-        #print(imgs.shape,img.shape) 
         imgs = np.append(imgs, np.array([img]), axis=0)
     imgs = imgs.reshape((-1,size,size,channel))
     return imgs
@@ -94,14 +93,14 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_plac
         for i in range(0, data_size, batch_size):
             batch_files = [random.choice(filenames) for _ in range(batch_size)]
             
-            rgb388 = sample(512, 3, './data/rgb388/', batch_files)
-            linedraw388 = sample(512, 3, './data/linedraw388/', batch_files)
+            rgb512 = sample(512, 3, './data/rgb512/', batch_files)
+            linedraw512 = sample(512, 3, './data/linedraw512/', batch_files)
             
             batch_time = time.time()
-            d_loss, _ = sess.run([train.d_loss,train.opt_d],{train.realA:rgb388,train.reshaped_realB:linedraw388})  
-            g_img, g_loss, _ = sess.run([train.fakeA,train.g_loss,train.opt_g],{train.realA:rgb388,train.reshaped_realB:linedraw388})
+            d_loss, _ = sess.run([train.d_loss,train.opt_d],{train.realA:rgb512,train.realB:linedraw512})  
+            g_img, g_loss, _ = sess.run([train.fakeA,train.g_loss,train.opt_g],{train.realA:rgb512,train.realB:linedraw512})
              
-            visualize_g(512, g_img, linedraw388, rgb388, batch_size, epoch, i)
+            visualize_g(512, g_img, linedraw512, rgb512, batch_size, epoch, i)
             print('    g_loss:',g_loss,'    d_loss:',d_loss,' speed:',time.time()-batch_time," batches / s")
 
         print('--------------------------------')
