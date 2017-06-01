@@ -54,12 +54,6 @@ class Train():
         self.opt_d = tf.train.AdamOptimizer(0.0002,beta1=0.5).minimize(self.d_loss, var_list=d_var)
         self.opt_g = tf.train.AdamOptimizer(0.0002,beta1=0.5).minimize(self.g_loss, var_list=g_var)
 
-batch_size = 5
-epochs = 3000
-filenames = [random.choice(os.listdir('./data/rgb512/')) for _ in range(1000)]
-data_size = len(filenames)
-step = int(data_size/batch_size)
-
 if not os.path.exists('./saved/'):
     os.mkdir('./saved/')
 
@@ -82,28 +76,37 @@ def visualize_g(size, g_img, x_img, t_img,batch_size, epoch, i):
         img.save('./visualized/epoch{}batch_num{}batch{}.jpg'.format(epoch,n,i))
     
 
-train = Train()
-with tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=True)) as sess:
-    tf.global_variables_initializer().run()
-    saver = tf.train.Saver(tf.global_variables())
-    graph = tf.summary.FileWriter('./logas', sess.graph)
+def main():
+    batch_size = 5
+    epochs = 3000
+    filenames = [random.choice(os.listdir('./data/rgb512/')) for _ in range(1000)]
+    data_size = len(filenames)
 
-    for epoch in range(epochs):
-        new_time = time.time() 
-        for i in range(0, data_size, batch_size):
-            batch_files = [random.choice(filenames) for _ in range(batch_size)]
+    train = Train()
+    with tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=True)) as sess:
+        tf.global_variables_initializer().run()
+        saver = tf.train.Saver(tf.global_variables())
+        graph = tf.summary.FileWriter('./logas', sess.graph)
+
+        for epoch in range(epochs):
+            new_time = time.time() 
+            for i in range(0, data_size, batch_size):
+                batch_files = [random.choice(filenames) for _ in range(batch_size)]
             
-            rgb512 = sample(512, 3, './data/rgb512/', batch_files)
-            linedraw512 = sample(512, 3, './data/linedraw512/', batch_files)
+                rgb512 = sample(512, 3, './data/rgb512/', batch_files)
+                linedraw512 = sample(512, 3, './data/linedraw512/', batch_files)
             
-            batch_time = time.time()
-            d_loss, _ = sess.run([train.d_loss,train.opt_d],{train.realA:rgb512,train.realB:linedraw512})  
-            g_img, g_loss, _ = sess.run([train.fakeA,train.g_loss,train.opt_g],{train.realA:rgb512,train.realB:linedraw512})
+                batch_time = time.time()
+                d_loss, _ = sess.run([train.d_loss,train.opt_d],{train.realA:rgb512,train.realB:linedraw512})  
+                g_img, g_loss, _ = sess.run([train.fakeA,train.g_loss,train.opt_g],{train.realA:rgb512,train.realB:linedraw512})
              
-            visualize_g(512, g_img, linedraw512, rgb512, batch_size, epoch, i)
-            print('    g_loss:',g_loss,'    d_loss:',d_loss,' speed:',time.time()-batch_time," batches / s")
+                visualize_g(512, g_img, linedraw512, rgb512, batch_size, epoch, i)
+                print('    g_loss:',g_loss,'    d_loss:',d_loss,' speed:',time.time()-batch_time," batches / s")
 
-        print('--------------------------------')
-        print('epoch_num:',epoch,'    epoch_time:',time.time()-new_time)
-        print('--------------------------------')
-        saver.save(sess, "saved/model.ckpt")
+            print('--------------------------------')
+            print('epoch_num:',epoch,'    epoch_time:',time.time()-new_time)
+            print('--------------------------------')
+            saver.save(sess, "saved/model.ckpt")
+
+if __name__ == "__main__":
+    main()
