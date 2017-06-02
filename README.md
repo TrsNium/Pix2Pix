@@ -24,3 +24,6 @@ $ python train.py
 ```     
 And I use some library.    
 Please install tensorflow,pillow, BeutifulSoup4 and cv2
+
+#Learned Model
+I published [here](https://drive.google.com/file/d/0B9xf-pPleHZ4cmJoaWgydGJWSTg/view?usp=sharing)
